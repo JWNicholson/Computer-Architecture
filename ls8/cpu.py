@@ -19,7 +19,7 @@ class CPU:
         # Memory address register
         self.MAR = None
         # Memory data register
-        sefl.MRD = None
+        self.MDR = None
         # set default is programming running to False
         self.running = False
         # set eaual default to False
@@ -29,6 +29,15 @@ class CPU:
         """Load a program into memory."""
 
         address = 0
+
+        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/mult.ls8") as program:
+            for instructions in program:
+                value = instructions.split("#")[0].strip()
+                if value == "":
+                    continue
+                x = int(value, 2)
+                self.ram[address] = x
+                address += 1
 
         # For now, we've just hardcoded a program:
 
