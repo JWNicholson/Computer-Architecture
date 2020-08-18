@@ -2,60 +2,62 @@
 
 import sys
 
+SP = 7
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
         """Construct a new CPU."""
+        # RAM
         self.ram = [0] * 256
+        # registers
         self.reg = [0] * 8
+        # program counter
         self.pc = 0
+
         self.sp = 7
 
-    #mar and mdr for read and write functions
-    def ram_read(self,mar):
-        self.ram[mar] 
+        self.running = False
 
-    def ram_write(self, mar, mdr):
-        return self.ram[mdr]
+        self.equal = False
+        # self.halt = False
+        # self.equal = False
 
-    def load(self,prog):
+ 
+         
+    def load(self):
         """Load a program into memory."""
 
         address = 0
 
-        with open(sys.argv[1]) as program:
-            for instruction in program:
-                value = instruction.split("")[0].strip()#remove spaces from beginning and end
-                if value == "":
-                    continue
-                x = int(value, 2)
-                self.ram[address] = x
-                address += 1
-
         # For now, we've just hardcoded a program:
 
-        # program = [
-        #     # From print8.ls8
-        #     0b10000010, # LDI R0,8
-        #     0b00000000,
-        #     0b00001000,
-        #     0b01000111, # PRN R0
-        #     0b00000000,
-        #     0b00000001, # HLT
-        # ]
+        program = [
+            # From print8.ls8
+            0b10000010, # LDI R0,8
+            0b00000000,
+            0b00001000,
+            0b01000111, # PRN R0
+            0b00000000,
+            0b00000001, # HLT
+        ]
 
-        # for instruction in program:
-        #     self.ram[address] = instruction
-        #     address += 1
-
+        for instruction in program:
+            self.ram[address] = instruction
+            address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
-        #elif op == "SUB": etc
+        elif op == "MUL":
+            self.reg[reg_a] *= self.reg[reg_b]
+        elif op == "CMP":
+            if self.reg[reg_a] == self.reg[reg_b]:
+                self.equal = True
+            else:
+                self.equal = False
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -79,72 +81,113 @@ class CPU:
 
         print()
 
+    # adding MAR and MDR to CPU class for ram_read and ram_write
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self, MAR, MDR):
+        self.ram[MAR] = MDR
+    
+    #define apush valut to setup PUSH
+    def push_val(self, value):
+        self.reg[SP] -= 1
+        self.ram_write(value, self.reg[SP])
+    
+    #define pop value to setup PUSH
+    def pop_val(self):
+        value = self.ram_read(self.reg[SP])
+        self.reg[SP] += 1
+        return value
+
+    # Print the numeric value stored in the given register.
+    def PRN(self, operand_a, operand_b):
+        print(self.reg[operand_a])
+        self.pc += 2
+
+    #Set value of a register to an int
+    def LDI(self, operand_a, operand_b):
+        self.reg[operand_a] = operand_b
+        self.pc += 3
+
+    #Halts the CPU and exits the emulator
+    def HLT(self, operand_a, operand_b):
+        self.pc += 1
+        sys.exit(0)
+    
+    #Push the value in this register onto the stack
+    def PUSH(self, operand_a, operand_b):
+        self.push_val(self.reg[operand_a])
+        self.pc += 2
+    
+    #Pop the value from the top of stack into the given register
+    def POP(self, operand_a, operand_b):
+        self.reg[operand_a] = self.pop_val()
+        self.pc += 2
+    
+    # call a subroutine at the address stored in the register. Then push address of the instruction onto the stack so we can return to where we left off when the subroutine finishes.
+    def CALL(self, operand_a, operand_b):
+        self.push_val(self.pc + 2)
+        self.pc = self.reg[operand_a]
+    
+    #Return from the subroutine and pop the value from top of stack and store it in the PC
+    def RET(self, operand_a, operand_b):
+        self.pc = self.pop_val()
+
+
+    def MUL(self, operand_a, operand_b):
+        self.alu("MUL", operand_a, operand_b)
+        self.pc +=3
+
+    # add two registers and store sum in register a
+    def ADD(self, operand_a, operand_b):
+        self.alu("ADD", operand_a, operand_b)
+        self.pc +=3
+
+    #Jump to the address stored in the given register and set PC to address stored in this register
+    def JMP(self, operand_a, operand_b):
+        self.pc = self.reg[operand_a]
+
+    #Jump to address in this register if the equal flag is set True
+    def JEQ(self, operand_a, operand_b):
+        if self.equal == True:
+            self.pc = self.reg[operand_a]
+        else:
+            self.pc += 2
+
+    # Jump to address in this register if equal flag is set False
+    def JNE(self, operand_a, operand_b):
+        if self.equal == False:
+            self.pc = self.reg[operand_a]
+        else:
+            self.pc += 2
+
+    def CMP(self, operand_a, operand_b):
+        self.alu("CMP", operand_a, operand_b)
+        self.pc += 3
+
+    # read teh memory address stored in register PC and store result in IR
     def run(self):
-        """Run the CPU."""
-        #Assign operations
-        HLT = 0b00000001
-        LDI = 0b10000010
-        PRN = 0b01000111
-        MUL = 0b10100010
-        PUSH = 0b01000101
-        POP = 0b01000110
-        CALL = 0b01010000
-        RET = 0b00010001
-        ADD = 0b10100000
-        running = True
+        self.pc = 0
+        run_inst = {
+            1: self.HLT,
+            17: self.RET,
+            71: self.PRN,
+            69: self.PUSH,
+            70: self.POP,
+            80: self.CALL,
+            130: self.LDI,
+            160: self.ADD,
+            162: self.MUL,
+            84: self.JMP,
+            85: self.JEQ,
+            86: self.JNE,
+            167: self.CMP,
+           }
+        while not self.running:
+            IR = self.ram_read(self.pc)
+            operand_a = self.ram_read(self.pc + 1)
+            operand_b = self.ram_read(self.pc + 2)
+            run_inst[IR](operand_a, operand_b)
 
-        #operations
-        while running:
-            instruction = self.ram_read(self.pc)
-            opr_a = self.ram_read(self.pc + 1)
-            opr_b = self.ram_read(self.pc + 2)
-            #print(instruction)
-            if instruction == HLT:
-                running = False
-                self.pc +=1
-                
-            elif instruction == LDI:
-                self.reg[opr_a] = opr_b
-                self.pc += 3 
-            
-            elif instruction == PRN:
-                print(self.reg[opr_a])
-                self.pc += 2
-            
-            elif instruction == MUL:
-                product = self.reg[opr_a] * self.reg[opr_b]
-                self.reg[opr_a] = product
-                self.pc += 3
-
-            elif instruction == ADD:
-                added = self.reg[opr_a] + self.reg[opr_b]
-                self.reg[opr_a] = added
-                self.pc += 3 
-
-            elif instruction == PUSH:
-                data = self.reg[opr_a]
-                self.sp -= 1 
-                self.ram_write(self.sp, data)
-                self.pc += 2
-
-            elif instruction == POP:
-                value = self.ram_read(self.sp)
-                self.sp += 1
-                self.reg[opr_a] = value
-                self.pc += 2 
-
-            elif instruction == CALL:
-                #reg2 = self.ram[opr_a]
-                self.sp -= 1
-                self.ram[self.sp] = self.pc + 2
-                self.pc = self.reg[opr_a]
-
-            elif instruction == RET:
-                self.pc = self.ram[self.sp]
-                self.sp += 1 
-
-            else:
-                print(f"bad input: {bin(instruction)}")
-                running = False
-
-
+        # return self.halt
+        return self.running
