@@ -16,6 +16,10 @@ class CPU:
         self.pc = 0
         # points to the stack
         self.sp = 7
+        # Memory address register
+        self.MAR = None
+        # Memory data register
+        sefl.MRD = None
         # set default is programming running to False
         self.running = False
         # set eaual default to False
@@ -28,19 +32,19 @@ class CPU:
 
         # For now, we've just hardcoded a program:
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
+        # program = [
+        #     # From print8.ls8
+        #     0b10000010, # LDI R0,8
+        #     0b00000000,
+        #     0b00001000,
+        #     0b01000111, # PRN R0
+        #     0b00000000,
+        #     0b00000001, # HLT
+        # ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
+        # for instruction in program:
+        #     self.ram[address] = instruction
+        #     address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -51,7 +55,11 @@ class CPU:
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
 
-
+        elif op == "CMP":
+            if self.reg[reg_a] == reg[reg_b]:
+                self.equal = True
+            else:
+                self.equal = False
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -89,11 +97,11 @@ class CPU:
     #define apush valut to setup PUSH
     def push_val(self, value):
         self.reg[SP] -= 1
-        self.ram_write(value, self.reg[SP])
+        self.ram_write(value, self.reg[self.SP])
     
     #define pop value to setup PUSH
     def pop_val(self):
-        value = self.ram_read(self.reg[SP])
+        value = self.ram_read(self.reg[self.SP])
         self.reg[SP] += 1
         return value
 
@@ -159,6 +167,10 @@ class CPU:
         else:
             self.pc += 2
 
+    #Compare values in two registers. 
+    # If they are equal set Eqaul E flag to one, otherwise 0
+    # If register a is less than register b set the Less-than L flag to 1, otherwise 0
+    # If register a is greater than register b set the Greater-than G flag to 1, otherwise 0
     def CMP(self, operand_a, operand_b):
         self.alu("CMP", operand_a, operand_b)
         self.pc += 3
@@ -187,5 +199,4 @@ class CPU:
             operand_b = self.ram_read(self.pc + 2)
             run_inst[IR](operand_a, operand_b)
 
-        # return self.halt
         return self.running
