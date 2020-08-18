@@ -14,17 +14,13 @@ class CPU:
         self.reg = [0] * 8
         # program counter
         self.pc = 0
-
+        # points to the stack
         self.sp = 7
-
+        # set default is programming running to False
         self.running = False
-
+        # set eaual default to False
         self.equal = False
-        # self.halt = False
-        # self.equal = False
-
- 
-         
+        
     def load(self):
         """Load a program into memory."""
 
@@ -51,13 +47,11 @@ class CPU:
 
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
+
         elif op == "MUL":
             self.reg[reg_a] *= self.reg[reg_b]
-        elif op == "CMP":
-            if self.reg[reg_a] == self.reg[reg_b]:
-                self.equal = True
-            else:
-                self.equal = False
+
+
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -82,11 +76,15 @@ class CPU:
         print()
 
     # adding MAR and MDR to CPU class for ram_read and ram_write
-    def ram_read(self, MAR):
-        return self.ram[MAR]
+    def ram_read(self, address):
+        self.MAR = address
+        self.MDR = self.ram[self.MAR]
+        return self.MDR
 
-    def ram_write(self, MAR, MDR):
-        self.ram[MAR] = MDR
+    def ram_write(self, address, value):
+        self.MAR = address
+        self.MDR = value
+        self.ram[MAR] = self.MDR
     
     #define apush valut to setup PUSH
     def push_val(self, value):
@@ -104,7 +102,7 @@ class CPU:
         print(self.reg[operand_a])
         self.pc += 2
 
-    #Set value of a register to an int
+    #Set value of a register to an int. Note - LDI byte value is constant
     def LDI(self, operand_a, operand_b):
         self.reg[operand_a] = operand_b
         self.pc += 3
@@ -133,7 +131,7 @@ class CPU:
     def RET(self, operand_a, operand_b):
         self.pc = self.pop_val()
 
-
+    #Multiplies values in two register and store result in register a
     def MUL(self, operand_a, operand_b):
         self.alu("MUL", operand_a, operand_b)
         self.pc +=3
