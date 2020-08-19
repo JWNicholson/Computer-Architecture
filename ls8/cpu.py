@@ -30,30 +30,15 @@ class CPU:
 
         address = 0
 
-        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/mult.ls8") as program:
+        #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/mult.ls8") as program:
+        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/stack.ls8") as program:
             for instructions in program:
-                value = instructions.split("#")[0].strip()
+                value = instructions.split()[0].strip()
                 if value == "":
                     continue
                 x = int(value, 2)
                 self.ram[address] = x
                 address += 1
-
-        # For now, we've just hardcoded a program:
-
-        # program = [
-        #     # From print8.ls8
-        #     0b10000010, # LDI R0,8
-        #     0b00000000,
-        #     0b00001000,
-        #     0b01000111, # PRN R0
-        #     0b00000000,
-        #     0b00000001, # HLT
-        # ]
-
-        # for instruction in program:
-        #     self.ram[address] = instruction
-        #     address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -105,8 +90,8 @@ class CPU:
     
     #define apush valut to setup PUSH
     def push_val(self, value):
-        self.reg[SP] -= 1
         self.ram_write(value, self.reg[self.SP])
+        self.reg[self.SP] -= 1
     
     #define pop value to setup PUSH
     def pop_val(self):
