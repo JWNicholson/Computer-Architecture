@@ -29,7 +29,7 @@ class CPU:
         """Load a program into memory."""
 
         address = 0
-
+        #with("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/print8.ls8")
         #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/mult.ls8") as program:
         with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/stack.ls8") as program:
             for instructions in program:
@@ -115,11 +115,17 @@ class CPU:
         sys.exit(0)
     
     #Push the value in this register onto the stack
+    #Decrement SP
+    #Find current stack location
+    #Reposition register to operand_a location in stack
+    #Increment PCC by 2
     def PUSH(self, operand_a, operand_b):
-        self.push_val(self.reg[operand_a])
+        self.reg[self.SP] -= 1
+        self.ram_write(self.reg[self.SP], self.reg[operand_a])
         self.pc += 2
     
     #Pop the value from the top of stack into the given register
+    #Copy valu from address at operand_a and set it equal to SP register location
     def POP(self, operand_a, operand_b):
         self.reg[operand_a] = self.pop_val()
         self.pc += 2
@@ -130,6 +136,7 @@ class CPU:
         self.pc = self.reg[operand_a]
     
     #Return from the subroutine and pop the value from top of stack and store it in the PC
+    #Pop value from top of stack and store it in PC
     def RET(self, operand_a, operand_b):
         self.pc = self.pop_val()
 
