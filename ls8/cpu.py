@@ -15,7 +15,7 @@ class CPU:
         # program counter
         self.pc = 0
         # points to the stack
-        self.sp = 7
+        self.SP = 7
         # Memory address register
         self.MAR = None
         # Memory data register
@@ -86,7 +86,7 @@ class CPU:
     def ram_write(self, address, value):
         self.MAR = address
         self.MDR = value
-        self.ram[MAR] = self.MDR
+        self.ram[self.MAR] = self.MDR
     
     #define apush valut to setup PUSH
     def push_val(self, value):
