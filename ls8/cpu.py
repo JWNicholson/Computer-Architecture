@@ -137,8 +137,12 @@ class CPU:
         self.pc += 2
     
     # call a subroutine at the address stored in the register. Then push address of the instruction onto the stack so we can return to where we left off when the subroutine finishes.
+    # def CALL(self, operand_a, operand_b):
+    #     self.push_val(self.pc + 2)
+    #     self.pc = self.reg[operand_a]
     def CALL(self, operand_a, operand_b):
-        self.push_val(self.pc + 2)
+        self.reg[self.SP] -= 1
+        self.ram[self.reg[self.SP]]  = self.pc + 2
         self.pc = self.reg[operand_a]
     
     #Return from the subroutine and pop the value from top of stack and store it in the PC
