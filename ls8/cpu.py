@@ -31,7 +31,8 @@ class CPU:
         address = 0
         #with("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/print8.ls8")
         #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/mult.ls8") as program:
-        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/stack.ls8") as program:
+        #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/stack.ls8") as program:
+        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/call.ls8") as program:
             for instructions in program:
                 value = instructions.split()[0].strip()
                 if value == "":
