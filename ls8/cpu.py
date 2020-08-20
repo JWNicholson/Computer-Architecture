@@ -34,7 +34,8 @@ class CPU:
         #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/stack.ls8") as program:
         with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/call.ls8") as program:
             for instructions in program:
-                value = instructions.split()[0].strip()
+                #value = instructions.split()[0].strip()
+                value = instructions.split("#")[0].strip()
                 if value == "":
                     continue
                 x = int(value, 2)
@@ -127,8 +128,12 @@ class CPU:
     
     #Pop the value from the top of stack into the given register
     #Copy valu from address at operand_a and set it equal to SP register location
+    # def POP(self, operand_a, operand_b):
+    #     self.reg[operand_a] = self.pop_val()
+    #     self.pc += 2
     def POP(self, operand_a, operand_b):
-        self.reg[operand_a] = self.pop_val()
+        self.reg[operand_a] = self.ram_read(self.reg[self.SP])
+        self.reg[self.SP] += 1
         self.pc += 2
     
     # call a subroutine at the address stored in the register. Then push address of the instruction onto the stack so we can return to where we left off when the subroutine finishes.
@@ -138,8 +143,11 @@ class CPU:
     
     #Return from the subroutine and pop the value from top of stack and store it in the PC
     #Pop value from top of stack and store it in PC
+    # def RET(self, operand_a, operand_b):
+    #     self.pc = self.pop_val()
     def RET(self, operand_a, operand_b):
-        self.pc = self.pop_val()
+        self.pc = self.ram[self.reg[self.SP]]
+        self.reg[self.SP] += 1
 
     #Multiplies values in two register and store result in register a
     def MUL(self, operand_a, operand_b):
