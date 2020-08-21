@@ -32,7 +32,8 @@ class CPU:
         #with("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/print8.ls8")
         #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/mult.ls8") as program:
         #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/stack.ls8") as program:
-        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/call.ls8") as program:
+        #with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/call.ls8") as program:
+        with open("/mnt/h/CS32/Comp_Arc/Computer-Architecture/ls8/examples/sctest.ls8") as program:
             for instructions in program:
                 #value = instructions.split()[0].strip()
                 value = instructions.split("#")[0].strip()
@@ -193,19 +194,19 @@ class CPU:
     def run(self):
         self.pc = 0
         run_inst = {
-            1: self.HLT,
-            17: self.RET,
-            71: self.PRN,
-            69: self.PUSH,
-            70: self.POP,
-            80: self.CALL,
-            130: self.LDI,
-            160: self.ADD,
-            162: self.MUL,
-            84: self.JMP,
-            85: self.JEQ,
-            86: self.JNE,
-            167: self.CMP,
+            1: self.HLT, # binary -- 00000001
+            17: self.RET, # binary -- 00010001
+            71: self.PRN, # 01000111
+            69: self.PUSH, # 01000101
+            70: self.POP, # 01000110
+            80: self.CALL, # 01010000
+            130: self.LDI, # 10000010
+            160: self.ADD, # 10100000
+            162: self.MUL, # 10100010
+            84: self.JMP, # 01010100
+            85: self.JEQ, # 01010101
+            86: self.JNE, # 01010110
+            167: self.CMP, # 10100111
            }
         while not self.running:
             IR = self.ram_read(self.pc)
